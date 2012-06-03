@@ -116,6 +116,19 @@ function readQueryArray(&$file)
 }//function readQueryArray
 
 
+function getUserFromUserLine($userLine)
+{
+  if (substr($userLine, 0, 12)!=='# User@Host:')
+  {
+    return false;
+  }
+  $userLine = trim(substr($userLine, 12));
+  $both = explode('@', $userLine);
+  if (count($both)===2) return trim($both[0]);
+  return false;
+}//function getUserFromUserLine
+
+
 /* "splits" a slow query log file by user, i.e. reads entries from origLog and
    only saves the entries matching the user $user to the file newLog. Returns
    zero in case of success or a non-zero int value in case of failure.
@@ -220,15 +233,18 @@ function splitLog($origLog, $newLog, $user)
     }//if int
     else
     {
-      //write to target
-      //TODO: check user
-      fwrite($target, $data['time']);
-      fwrite($target, $data['user']);
-      fwrite($target, $data['stats']);
-      foreach($data['query'] as $ql)
+      //check user
+      if (getUserFromUserLine($data['user'])===$user)
       {
-        fwrite($target, $ql);
-      }//foreach
+        //write to target
+        fwrite($target, $data['time']);
+        fwrite($target, $data['user']);
+        fwrite($target, $data['stats']);
+        foreach($data['query'] as $ql)
+        {
+          fwrite($target, $ql);
+        }//foreach
+      }//if
     }//else - it's an array
   } while (!feof($file) && is_array($data));
 

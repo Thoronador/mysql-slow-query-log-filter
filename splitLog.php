@@ -229,6 +229,7 @@ function splitLog($origLog, $newLog, $user)
     if (is_int($data))
     {
       fclose($file);
+      fclose($target);
       return $data;
     }//if int
     else

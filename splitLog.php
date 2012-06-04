@@ -183,6 +183,8 @@ function getUserFromUserLine($userLine)
    remarks:
        If the file at newLog already exists, the function will fail and return
        an error code, because we don't want to overwrite existing files.
+       You can use the errorCodeToString() function to get a brief description
+       of the error code's meaning.
 */
 function splitLog($origLog, $newLog, $user)
 {
@@ -310,7 +312,13 @@ function splitLog($origLog, $newLog, $user)
    returns:
        If successful, the function returns an associative array. The keys of it
        are the strings containing the user names, and the associated values are
-       integers that indicate the number of log entries for that user.
+       integers that indicate the number of log entries for that user. It is
+       possible that the returned array is empty, but that should usually not
+       happen, unless the slow query log itself is empty, except for the three
+       leading lines.
+       If an error occured, the function returns an integer error code.
+       You can use the errorCodeToString() function to get a brief description
+       of the error code's meaning.
 */
 function getLogUserStatistics($slowLog)
 {

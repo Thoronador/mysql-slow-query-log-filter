@@ -115,7 +115,14 @@ function readQueryArray(&$file)
   return SPLIT_ERROR_NO_QUERY;
 }//function readQueryArray
 
+/* tries to get the user name from the given string, which has to be the line
+   starting with "# User@Host: ..." from the slow query log. Returns a string
+   containing the user name in case of success; returns false in case of
+   failure.
 
+   parameters:
+       userLine - (string) a line starting with "# User@Host: ..." from the log
+*/
 function getUserFromUserLine($userLine)
 {
   if (substr($userLine, 0, 12)!=='# User@Host:')
@@ -142,6 +149,10 @@ function getUserFromUserLine($userLine)
    returns:
        Returns zero in case of success or a positive non-zero integer value
        indicating the type of error in case of failure.
+
+   remarks:
+       If the file at newLog already exists, the function will fail and return
+       an error code, because we don't want to overwrite existing files.
 */
 function splitLog($origLog, $newLog, $user)
 {
@@ -165,7 +176,7 @@ function splitLog($origLog, $newLog, $user)
     return SPLIT_ERROR_TARGET_EXISTS;
   }
 
-  //open file
+  //open slow query log file
   $file = fopen($origLog, 'rb');
   if ($file===false)
   {

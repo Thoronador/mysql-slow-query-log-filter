@@ -31,6 +31,36 @@ define('SPLIT_ERROR_NOT_SQL',       5);
 define('SPLIT_ERROR_NO_QUERY',      6);
 define('SPLIT_ERROR_EOF',           7);
 
+/* returns a brief description of the error code's meaning
+
+   parameters:
+       code - (int) the error code, usually one of the constants above
+*/
+function errorCodeToString($code)
+{
+  switch ((int)$code)
+  {
+    case SPLIT_ERROR_NONE:
+         return 'No error.';
+    case SPLIT_ERROR_NOT_EXISTS:
+         return 'Log file does not exist.';
+    case SPLIT_ERROR_NOT_A_FILE:
+         return 'Given path does not point to a file.';
+    case SPLIT_ERROR_TARGET_EXISTS:
+         return 'File with target name already exists.';
+    case SPLIT_ERROR_IO:
+         return 'I/O error.';
+    case SPLIT_ERROR_NOT_SQL:
+         return 'File does not seem to be the slow query log.';
+    case SPLIT_ERROR_NO_QUERY:
+         return 'No query listed after statistic data.';
+    case SPLIT_ERROR_EOF:
+         return 'Unexpected end of file.';
+    default:
+         return 'Unknown error code ('.intval($code).')';
+  }//swi
+}//function errorCodeToString
+
 //aux. function
 function readQueryArray(&$file)
 {

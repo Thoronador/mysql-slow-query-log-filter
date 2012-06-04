@@ -301,4 +301,116 @@ function splitLog($origLog, $newLog, $user)
   return SPLIT_ERROR_NONE;
 }//function splitLog
 
+
+/* returns user distribution in given query log
+
+   parameters:
+       slowLog - (string) path to the slow query log file
+
+   returns:
+       If successful, the function returns an associative array. The keys of it
+       are the strings containing the user names, and the associated values are
+       integers that indicate the number of log entries for that user.
+*/
+function getLogUserStatistics($slowLog)
+{
+  $slowLog = (string) $slowLog;
+
+  //check existence
+  if (file_exists($slowLog)===false)
+  {
+    return SPLIT_ERROR_NOT_EXISTS;
+  }
+  //only real files, no directories
+  if (is_file($slowLog)===false)
+  {
+    return SPLIT_ERROR_NOT_A_FILE;
+  }
+  //open slow query log file for reading
+  $file = fopen($slowLog, 'rb');
+  if ($file===false)
+  {
+    return SPLIT_ERROR_IO;
+  }
+  // ---- read starting lines
+  $nextLine = fgets($file);
+  if ($nextLine===false)
+  {
+    //unexpected end of file or I/O error
+    fclose($file);
+    return SPLIT_ERROR_IO;
+  }
+  //should be starting line
+  if (substr($nextLine, 0, 25)!=='/usr/sbin/mysqld, Version')
+  {
+    fclose($file);
+    return SPLIT_ERROR_NOT_SQL;
+  }
+  //read tcp line
+  $nextLine = fgets($file);
+  if ($nextLine===false)
+  {
+    //unexpected end of file or I/O error
+    fclose($file);
+    return SPLIT_ERROR_IO;
+  }
+  //should be tcp line
+  if (substr($nextLine, 0, 9)!=='Tcp port:')
+  {
+    fclose($file);
+    return SPLIT_ERROR_NOT_SQL;
+  }
+  // read Time line
+  $nextLine = fgets($file);
+  if ($nextLine===false)
+  {
+    //unexpected end of file or I/O error
+    fclose($file);
+    return SPLIT_ERROR_IO;
+  }
+  //should be Time line
+  if (substr($nextLine, 0, 5)!=='Time ')
+  {
+    fclose($file);
+    return SPLIT_ERROR_NOT_SQL;
+  }
+
+  //prepare statistics array
+  $stats = array();
+
+  //now read the real log lines
+  do
+  {
+    $data = readQueryArray($file);
+    if (is_int($data))
+    {
+      fclose($file);
+      unset($stats);
+      return $data;
+    }//if int
+    else
+    {
+      //check user
+      $user = getUserFromUserLine($data['user']);
+      if ($user!==false)
+      {
+        if(isset($stats[$user]))
+        {
+          ++$stats[$user];
+        }
+        else $stats[$user] = 1;
+      }//if
+    }//else - it's an array
+  } while (!feof($file) && is_array($data));
+
+  fclose($file);
+  if (is_int($data))
+  {
+    //error occured in do-while-loop
+    return $data;
+  }
+  //no error
+  return $stats;
+}//function getLogUserStatistics
+
 ?>

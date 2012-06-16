@@ -72,15 +72,13 @@ function readQueryArray(&$file)
     fclose($file);
     return SPLIT_ERROR_IO;
   }
-  //should be Time line
-  if (substr($nextLine, 0, 7)!=='# Time:')
+  //should be Time line (but does not have to)
+  if (substr($nextLine, 0, 7)==='# Time:')
   {
-    fclose($file);
-    return SPLIT_ERROR_NOT_SQL;
+    $result['time'] = $nextLine;
+    //read user/host line
+    $nextLine = fgets($file);
   }
-  $result['time'] = $nextLine;
-  //read user/host line
-  $nextLine = fgets($file);
   if ($nextLine===false)
   {
     //unexpected end of file or I/O error
@@ -271,7 +269,6 @@ function splitLog($origLog, $newLog, $user)
     $data = readQueryArray($file);
     if (is_int($data))
     {
-      fclose($file);
       fclose($target);
       return $data;
     }//if int
@@ -392,7 +389,6 @@ function getLogUserStatistics($slowLog)
     $data = readQueryArray($file);
     if (is_int($data))
     {
-      fclose($file);
       unset($stats);
       return $data;
     }//if int

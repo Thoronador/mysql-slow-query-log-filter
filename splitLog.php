@@ -4,6 +4,7 @@
 
     This file is part of the slow query log filter.
     Copyright (C) 2012  Thoronador
+    Copyright (C) 2012  Fizzban (minor modifications)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
